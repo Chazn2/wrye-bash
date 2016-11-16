@@ -47,7 +47,7 @@ from itertools import groupby
 from collections import OrderedDict
 
 #--Local
-from .. import bass, bolt, balt, bush, env, load_order, libbsa
+from .. import bass, bolt, balt, bush, env, load_order, libbsa, archives
 from .mods_metadata import ConfigHelpers
 from ..bass import dirs, inisettings, tooldirs, reModExt
 from .. import patcher # for configIsCBash()
@@ -57,7 +57,8 @@ from ..bolt import BoltError, AbstractError, ArgumentError, StateError, \
 from ..bolt import LString, GPath, Flags, DataDict, SubProgress, cstrip, \
     deprint, sio, Path
 from ..bolt import decode, encode
-from ..bolt import defaultExt, compressionSettings, countFilesInArchive, readExts
+from ..archives import defaultExt, readExts, compressionSettings, \
+    countFilesInArchive
 # cint
 from ..cint import ObCollection, CBashApi
 from ..brec import MreRecord, ModReader, ModError, ModWriter, getObjectIndex, \
@@ -107,7 +108,7 @@ reComment = re.compile(u'#.*',re.U) ##: used in OBSEIniFile ??
 reExGroup = re.compile(u'(.*?),',re.U)
 _reEsmExt  = re.compile(ur'\.esm(.ghost)?$', re.I | re.U)
 reEspExt  = re.compile(ur'\.esp(.ghost)?$',re.I|re.U)
-__exts = ur'((\.(' + ur'|'.join(ext[1:] for ext in bolt.readExts) + ur'))|)$'
+__exts = ur'((\.(' + ur'|'.join(ext[1:] for ext in readExts) + ur'))|)$'
 reTesNexus = re.compile(ur'(.*?)(?:-(\d{1,6})(?:\.tessource)?(?:-bain)'
     ur'?(?:-\d{0,6})?(?:-\d{0,6})?(?:-\d{0,6})?(?:-\w{0,16})?(?:\w)?)?'
     + __exts, re.I | re.U)
@@ -5707,7 +5708,7 @@ class InstallerArchive(Installer):
                 _li.filepath = _li.size = _li.crc = _li.isdir = 0
         with archive_path.unicodeSafe() as tempArch:
             try:
-                bolt.list_archive(tempArch, _parse_archive_line)
+                archives.list_archive(tempArch, _parse_archive_line)
                 self.crc = _li.cumCRC & 0xFFFFFFFFL
             except:
                 archive_msg = u"Unable to read archive '%s'." % archive_path.s
@@ -5735,11 +5736,11 @@ class InstallerArchive(Installer):
                 numFiles = countFilesInArchive(arch, self.tempList, recurse)
                 progress.setFull(numFiles)
             #--Extract files
-            command = bolt.extractCommand(arch, self.getTempDir())
+            command = archives.extractCommand(arch, self.getTempDir())
             command += u' @%s' % self.tempList.s
             if recurse: command += u' -r'
             try:
-                bolt.extract7z(command, GPath(self.archive), progress)
+                archives.extract7z(command, GPath(self.archive), progress)
             finally:
                 self.tempList.remove()
                 bolt.clearReadOnly(self.getTempDir())
@@ -5828,7 +5829,7 @@ class InstallerArchive(Installer):
                         (u'%s' % filepath[0], value and (value[0] == u'D')))
                 elif key == u'Method':
                     filepath[0] = u''
-            bolt.list_archive(tempArch, _parse_archive_line)
+            archives.list_archive(tempArch, _parse_archive_line)
         text.sort()
         #--Output
         for node, isdir in text:
@@ -6072,10 +6073,10 @@ class InstallerProject(Installer):
                     out.write(u'--*\\')
             #--Compress
             command = u'"%s" a "%s" -t"%s" %s -y -r -o"%s" -i!"%s\\*" -x@%s -scsUTF-8 -sccUTF-8' % (
-                bolt.exe7z, outFile.temp.s, archiveType, solid, outDir.s, projectDir.s, self.tempList.s)
+                archives.exe7z, outFile.temp.s, archiveType, solid, outDir.s, projectDir.s, self.tempList.s)
             try:
-                bolt.compress7z(command, outDir, outFile.tail, projectDir,
-                                progress)
+                archives.compress7z(command, outDir, outFile.tail, projectDir,
+                                    progress)
             finally:
                 self.tempList.remove()
             outFile.moveTo(realOutFile)
@@ -8027,7 +8028,7 @@ def initBosh(personal=empty_path, localAppData=empty_path, bashIni=None):
     except IOError:
         deprint('Error creating log file', traceback=True)
     Installer.init_bain_dirs()
-    bolt.exe7z = dirs['compiled'].join(bolt.exe7z).s
+    archives.exe7z = dirs['compiled'].join(archives.exe7z).s
 
 def initSettings(readOnly=False, _dat=u'BashSettings.dat',
                  _bak=u'BashSettings.dat.bak'):
