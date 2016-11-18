@@ -11,6 +11,13 @@ Wrye Bash is a mod management utility for Oblivion and Skyrim with a rich set
  Please read the [Contributing](#contributing) section below if interested in
  contributing.
 
+####Supported Games
+
+* Oblivion (patch 1.2.0416)
+* Skyrim (patch 1.9.32.0.8)
+* Fallout 4 (patch 1.8.7.0)
+* Skyrim Special Edition (patch 1.2.39.0.8
+
 ###Download
 
 * [Oblivion Nexus][2]
@@ -30,7 +37,7 @@ Docs are included in the download but we are setting them up also online
 To run Wrye Bash from the latest `dev` code (download from [here][8])
 you need:
 
-* A game to manage (currently Oblivion, Skyrim or Fallout 4)
+* A game to manage from the supported games.
 * [Python 2.7](http://www.python.org/) (latest 2.7 is recommended)
 * [wxPython 2.8.12.1 Unicode][9] (do **not** get a newer version)
 * [pywin32 build 220 or newer](https://sourceforge.net/projects/pywin32/files/pywin32/)
